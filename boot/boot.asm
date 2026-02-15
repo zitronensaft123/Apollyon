@@ -47,6 +47,8 @@ protected_mode_start:
     mov ss, ax                      ; set ss to the data segment selector
     mov esp, 0x90000                ; move the stackpointer away from bootloader code to 0x90000 in memory
 
+    jmp $
+
 gdt:
     dq 0x0000000000000000           ; null descriptor
 
