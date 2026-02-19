@@ -1,4 +1,5 @@
 ; my own bootloader! (★^O^★)
+
 org 0x7C00                          ; BIOS loads us at memory address 0x7C00
 [bits 16]                           ; assemble in 16bit
 
@@ -11,7 +12,6 @@ start:
     mov sp, 0x7C00                  ; set stack pointer to 0x7C00
 
     ; print all the register to the screen + other cool stuff :D
-
     call print_info
 
     loop:
@@ -45,6 +45,7 @@ print_info:
 
 ; print all registers to screen (i have no idea if theres a better way for this)
 print_registers:
+    ; general purpose registers
     mov si, max             
     call print_string       ; this ones probably 0E00 because i put 0E into ah
     call print_register
@@ -84,6 +85,9 @@ print_registers:
     mov ax, di              ; random or 0000
     call print_register
     call print_newline
+
+    ; Segment Registers:
+
     ret
 
 ; print register to screen
@@ -154,8 +158,8 @@ print_string:
 
 ; all my cool message strings 
 introduction db "=== Welcome to ApollyonOS! ===", 0  
-realmode db "CPU is currently in RealMode!", 0  
-content db "RealMode register content:", 0  
+realmode db "CPU is currently in Real mode!", 0  
+content db "Real mode register content:", 0  
 max db "AX: ", 0  
 mbx db "BX: ", 0  
 mcx db "CX: ", 0  
