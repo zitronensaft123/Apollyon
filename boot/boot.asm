@@ -9,37 +9,20 @@ start:
     mov ss, ax                      ; set stack segment to 0
     mov sp, 0x7C00                  ; set stack pointer to 0x7C00
 
-    mov si, msg
-    call print                      ; call the print func
+    ;lgdt [gdt_descriptor]           ; load GDT
 
-    lgdt [gdt_descriptor]           ; load GDT
+    ;mov eax, cr0                    ; move the value of CR0 (control register 0) into eax
+    ;or eax, 1                       ; set bit 0 of EAX to 1 (bitwise OR)
+    ;mov cr0, eax                    ; enable protected mode
 
-    mov eax, cr0                    ; move the value of CR0 (control register 0) into eax
-    or eax, 1                       ; set bit 0 of EAX to 1 (bitwise OR)
-    mov cr0, eax                    ; enable protected mode
+    ;jmp 0x08:protected_mode_start   ; far jump  
 
-    jmp 0x08:protected_mode_start   ; far jump  
-
+    mov ax, 0xBEEF
+    call print_register
+    
     loop:
-        ;print all the general purpose registers
-        mov ax, ax
-        call print_register
-        mov ax, bx
-        call print_register
-        mov ax, cx
-        call print_register
-        mov ax, dx
-        call print_register
-        mov ax, sp
-        call print_register
-        mov ax, bp
-        call print_register
-        mov ax, si
-        call print_register
-        mov ax, di
-        call print_register
-
         jmp loop                    ; infinite loop
+
 
 print:
     mov ah, 0X0E                    ; set BIOS function to 0x0E (print char in TTY)
