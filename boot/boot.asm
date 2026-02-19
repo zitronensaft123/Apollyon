@@ -3,14 +3,14 @@ org 0x7C00                          ; BIOS loads us at memory address 0x7C00
 
 start:
 
+    cli                             ; disable interrputs
+    
     mov ax, 0                       ; clear ax register
     mov ss, ax                      ; set stack segment to 0
     mov sp, 0x7C00                  ; set stack pointer to 0x7C00
 
     mov si, msg
     call print                      ; call the print func
-
-    cli                             ; disable interrputs
 
     lgdt [gdt_descriptor]           ; load GDT
 
@@ -20,11 +20,76 @@ start:
 
     jmp 0x08:protected_mode_start   ; far jump  
 
-    hang:
-        jmp hang                    ; infinite loop
+    loop:
+        ;print all the general purpose registers
+        mov ax, ax
+        call print_register
+        mov ax, bx
+        call print_register
+        mov ax, cx
+        call print_register
+        mov ax, dx
+        call print_register
+        mov ax, sp
+        call print_register
+        mov ax, bp
+        call print_register
+        mov ax, si
+        call print_register
+        mov ax, di
+        call print_register
+
+        jmp loop                    ; infinite loop
 
 print:
     mov ah, 0X0E                    ; set BIOS function to 0x0E (print char in TTY)
+
+; print registers to screen
+print_register:
+    ; save values
+    push ax
+    push bx
+    push cx
+    push dx
+
+    mov bx, ax          ; copy
+    mov cx, 12          ; starting shift value
+
+    ; extract and convert loop
+    print_loop:
+
+        mov dx, bx      ; copy
+        shr dx, cl      ; shr: shift right by current value in cl
+        and dx, 0x000F  ; isolate value
+
+        mov al, dl      ; mov value to al
+
+        ; convert to ASCII
+        cmp al, 9
+        jbe digit1
+        add al, 0x37
+        jmp print_char
+
+    digit1:
+        add al, 0x30
+
+    ; print, pop and loop
+    print_char:
+
+        mov ah, 0x0E
+        int 0x10
+
+        sub cx, 4           ; change shift ammount
+        jns print_loop      ; loop till cl < 0
+        
+        ; restore (pop) values
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+        ret
+
+
 
 .next:
     lodsb                           ; load next byte from [SI] string into AL, increment SI
