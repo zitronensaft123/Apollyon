@@ -14,8 +14,8 @@ start:
     ; print all the register to the screen + other cool stuff :D
     call print_info
 
-    loop:
-        jmp loop                    ; infinite loop
+    ;loop:
+        ;jmp loop                    ; infinite loop
 
 
     ; enter protected mode
@@ -67,7 +67,7 @@ print_registers:
     call print_newline
     mov si, msp
     call print_string 
-    mov ax, sp              ; stack pointer starts at 7C00, push and it decreases, so something less than that
+    mov ax, sp              ; stack pointer starts at 7C00, push and it decreases, so something a little less than that
     call print_register
     call print_newline
     mov si, mbp
