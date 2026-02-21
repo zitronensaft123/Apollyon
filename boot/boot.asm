@@ -30,17 +30,19 @@ start:
 ; print infotext to screen
 print_info:
     call print_newline
-    mov si, introduction
+    mov si, introduction_string
     call print_string               
     call print_newline
     call print_newline
-    mov si, realmode
+    mov si, realmode_string
     call print_string 
     call print_newline
-    mov si, content
+    mov si, content_string
     call print_string 
     call print_newline
     call print_registers
+    mov si, swapmodes_string
+    call print_string
     ret
 
 ; print all registers to screen (i have no idea if theres a better way for this)
@@ -157,9 +159,10 @@ print_string:
     ret                             ; return to caller
 
 ; all my cool message strings 
-introduction db "=== Welcome to ApollyonOS! ===", 0  
-realmode db "CPU is currently in Real mode!", 0  
-content db "Real mode register content:", 0  
+introduction_string db "=== Welcome to ApollyonOS! ===", 0  
+realmode_string db "CPU is currently in Real mode!", 0  
+content_string db "Real mode register content:", 0  
+swapmodes_string db "Press any key to switch to Protected Mode!", 0
 max db "AX: ", 0  
 mbx db "BX: ", 0  
 mcx db "CX: ", 0  
