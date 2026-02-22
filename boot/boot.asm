@@ -162,7 +162,7 @@ print_string:
 introduction_string db "=== Welcome to ApollyonOS! ===", 0  
 realmode_string db "CPU is currently in Real mode!", 0  
 content_string db "Real mode register content:", 0  
-swapmodes_string db "Press any key to switch to Protected Mode!", 0
+swapmodes_string db "Press any key to switch to Protected mode!", 0
 max db "AX: ", 0  
 mbx db "BX: ", 0  
 mcx db "CX: ", 0  
