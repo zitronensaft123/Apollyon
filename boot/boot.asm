@@ -3,25 +3,38 @@
 org 0x7C00                          ; BIOS loads us at memory address 0x7C00
 [bits 16]                           ; assemble in 16bit
 
-start:
+start:    
 
-    cli                             ; disable interrputs
+    mov [BOOT], dl                  ; store Disk ID
+
+    call clear_registers
     
-    ; initial stuff
-    mov ax, 0                       ; clear ax register
-    mov ds, ax                      ; clear ds segmentation register
-
-    ; stack
+    ; initialize stack
     mov ss, ax                      ; set stack segment to 0
     mov sp, 0x7C00                  ; set stack pointer to 0x7C00
 
     ; print all the register to the screen + other cool stuff :D
     call print_info
 
+    ; read from disk
+    mov dh, 0                       ; head 0
+    mov dl, [BOOT]                  ; restore dl
+    mov ch, 0                       ; cylinder 0
+    mov ah, 0x02                    ; BIOS read sector function
+    mov al, 2                       ; read 2 sectors
+    mov bx, 0x1000                  ; destination offset
+    mov cl, 2                       ; start at sector 2
+
+    int 0x13                        ; read from Disk
+
+    jc disk_error                   ; check if carry flag is set
+
     ; enable a20 line (enable high memory access)
     in al, 0x92
     or al, 2
     out 0x92, al
+
+    cli                             ; disable interrputs
 
     ; enter protected mode
     lgdt [gdt_descriptor]           ; load GDT
@@ -31,6 +44,31 @@ start:
     mov cr0, eax                    ; enable protected mode
 
     jmp 0x08:protected_mode_start   ; far jump  
+
+BOOT: db 0
+
+clear_registers:
+
+    ; clear all registers
+    xor ax, ax                      ; set ax to 0
+    mov dx, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+    xor bx, bx
+    xor cx, cx
+    xor dx, dx
+    xor si, si 
+    xor di, di
+    xor bp, bp
+    ret
+
+disk_error:
+    mov ah, 0x0e
+    mov al, 'D'
+    int 0x10
+    jmp $
 
 ; print infotext to screen
 print_info:
@@ -176,27 +214,21 @@ mdi db "DI: ", 0
 
 [bits 32]                           ; assemble in 32 bit
 
-protected_mode_start:
+protected_mode_start: 
 
     ; reload segment registers
     mov ax, 0x10    
-    mov dx, ax
+    mov ds, ax
     mov es, ax
     mov ss, ax
     mov fs, ax
     mov gs, ax
 
-    mov ax, 0x10                    ; move 0x10 into AX
     mov ds, ax                      ; set ds to the data segment selector
     mov ss, ax                      ; set ss to the data segment selector
     mov esp, 0x90000                ; move the stackpointer away from bootloader code to 0x90000 in memory
 
-    ;mov eax, protected_mode_string
-    ;call print_string_vga
-
-    jmp $
-
-;print_string_vga:
+    jmp 0x08:0x1000                 ; absolute far jump
 
 gdt:
     dq 0x0000000000000000           ; null descriptor
