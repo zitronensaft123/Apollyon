@@ -7,16 +7,21 @@ start:
 
     cli                             ; disable interrputs
     
+    ; initial stuff
     mov ax, 0                       ; clear ax register
+    mov ds, ax                      ; clear ds segmentation register
+
+    ; stack
     mov ss, ax                      ; set stack segment to 0
     mov sp, 0x7C00                  ; set stack pointer to 0x7C00
 
     ; print all the register to the screen + other cool stuff :D
     call print_info
 
-    ;loop:
-        ;jmp loop                    ; infinite loop
-
+    ; enable a20 line (enable high memory access)
+    in al, 0x92
+    or al, 2
+    out 0x92, al
 
     ; enter protected mode
     lgdt [gdt_descriptor]           ; load GDT
@@ -159,7 +164,7 @@ print_string:
     ret                             ; return to caller
 
 ; all my cool message strings 
-introduction_string db "=== Welcome to ApollyonOS! ===", 0  
+introduction_string db "== Welcome to Apollyon OS! ==", 0
 realmode_string db "CPU is currently in Real mode!", 0  
 content_string db "Real mode register content:", 0  
 swapmodes_string db "Press any key to switch to Protected mode!", 0
@@ -175,12 +180,26 @@ mdi db "DI: ", 0
 [bits 32]                           ; assemble in 32 bit
 
 protected_mode_start:
+
+    ; reload segment registers
+    mov ax, 0x10    
+    mov dx, ax
+    mov es, ax
+    mov ss, ax
+    mov fs, ax
+    mov gs, ax
+
     mov ax, 0x10                    ; move 0x10 into AX
     mov ds, ax                      ; set ds to the data segment selector
     mov ss, ax                      ; set ss to the data segment selector
     mov esp, 0x90000                ; move the stackpointer away from bootloader code to 0x90000 in memory
 
+    ;mov eax, protected_mode_string
+    ;call print_string_vga
+
     jmp $
+
+;print_string_vga:
 
 gdt:
     dq 0x0000000000000000           ; null descriptor
