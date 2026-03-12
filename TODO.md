@@ -1,0 +1,1 @@
+ - get info, store it and pass the location to the kernel -> RAM, video modes
